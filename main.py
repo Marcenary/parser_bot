@@ -1,14 +1,13 @@
+import os
 import random
 import telebot
 
-from os import system
 from telebot import types
-from config import TOKENS
 from parser import Habr, OpenWeather
 from data import Clients
 
 debug = 0
-bot	  = telebot.TeleBot(TOKENS['bot'], parse_mode=None)
+bot	  = telebot.TeleBot(os.getenv('bot'), parse_mode=None)
 db 	  = Clients()
 habr: Habr = None
 
@@ -42,7 +41,7 @@ def getfile(message: types.Message):
 		name = habr.getFile()
 		with open(name, 'rb') as f:
 			bot.send_document(message.chat.id, f)
-		system(f'rm { name }')
+		os.system(f'rm { name }')
 
 
 @bot.message_handler(commands=['search'])
@@ -110,7 +109,7 @@ def answer(call: types.CallbackQuery):
 def weather(message: types.Message):
 	mess = message.text.replace('/weather', '').strip()
 	if mess != '' and len(mess) > 2:
-		ow = OpenWeather(mess, TOKENS['weather'])
+		ow = OpenWeather(mess, os.getenv('weather'))
 		bot.send_message(message.chat.id, ow.getInfo())
 	else: bot.send_message(message.chat.id, 'Короткое название города.\nВведите название города снова!')
 
@@ -145,5 +144,4 @@ def commands(message: types.Message):
 
 
 if __name__ == '__main__':
-	print('Bot work...')
 	bot.infinity_polling()
